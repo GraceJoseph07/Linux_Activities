@@ -1,25 +1,28 @@
-#include <stdio.h> 
-#include <string.h> 
-#include <unistd.h>
-#include <fcntl.h> 
-#include <sys/stat.h> 
-#include <sys/types.h> 
-int main() 
-{ 
-	int fd1; 
-	char * fifo1 = "/tmp/fifo1"; 
-	mkfifo(fifo1, 0666); 
-	char input1[100], input2[100]; 
-	while (1) 
-	{  
-		fd1 = open(fifo1,O_RDONLY); 
-		read(fd1, input1, 100);  
-		printf("Text input by Sender: %s\n", input1); 
-		close(fd1); 
-		fd1 = open(fifo1,O_WRONLY); 
-		fgets(input2, 100, stdin); 
-		write(fd1, input2, strlen(input2)+1); 
-		close(fd1); 
-	} 
-	return 0; 
-} 
+#include"chat.h"
+void main()
+{
+    char input[300]="start";
+    int fifo_write,fifo_read;
+    while(strcmp(input,"end")!=0)
+    {
+        fifo_write= open("pipeA",O_WRONLY);
+        if(fifo_write<0)
+            printf("\nError opening pipe");
+        else
+        {
+            printf("chat1: "); 
+            scanf("%s",input);
+            write(fifo_write,input,299*sizeof(char));
+            close(fifo_write);
+        }
+        fifo_read=open("pipeB",O_RDONLY);
+        if(fifo_read<0)
+            printf("\nError opening write pipe");
+        else
+        {
+            read(fifo_read,input,299*sizeof(char));
+            close(fifo_read);
+            printf("\n%s",input);
+        }
+    }
+}
